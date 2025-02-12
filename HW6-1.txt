@@ -1,0 +1,21 @@
+My routput for all 3 distributed counter programs are below:
+
+DistributedCounterTest1:
+Count is 1000000000
+Elapsed time is 170336ms
+
+DistributedCounterTest2:
+Count is 1000000000
+Elapsed time is 17200ms
+
+DistributedCounterTest3:
+Count is 1000000000
+Elapsed time is 5318ms
+
+Thus, DistributedCounterTest2 was about 10x faster than DistributedCounterTest1,
+and DistributedCounterTest3 was about 3x faster than DistributedCounterTest2.
+
+These programs were ran on a computer with an AMD Ryzen 9 5900x CPU, a processor with 12 cores and 24 threads.
+Since DistributedCounterTest1 only allows one thread to access the counter at a time, it is the slowest (even slower than non-threaded code, since there's overhead associated with the mutex).
+DistributedCounterTest2 utilizes multiple subcounters, which allows for a more efficient use of threading, and a lower time than DistributedCounterTest1, but some of the threads end up utilizing the same cache line, which means the program isn't an efficient as it could be.
+DistributedCounterTest3 adds padding to each counter to avoid false sharing. This allows for the program to be more efficient, and the time is lower than DistributedCounterTest2.

@@ -1,0 +1,4 @@
+The core theory behind finger binary is that each finger represents a binary digit (pun intended).
+Since we (at least most of us) have 10 fingers, we have 10 binary digits available to us.
+With 10 binary digits, we can represent 2^10 = 1024 different numbers.
+Since we traditionally start counting at 0, we can represent the numbers 0 through 1023.
