@@ -25,9 +25,15 @@ class btree
         btree() { 
 			root = nullptr;
 		}
-		~btree() {
-			destroy_tree();
-		}
+
+		// This btree constructor has been added to initialize root to a new node with the given value
+		btree(std::unique_ptr<node<T>> new_root) : root(std::move(new_root)) {}
+
+		//Since we rewrote the tree to utilize unique_ptrs instead of raw pointers, the delete_tree() methods have been removed
+		//Once the instance of the btree object (and therefore any unique_ptrs) goes out of scope, the memory will be automatically deleted, and this destructor is unnecessary
+		// I have left it in the code for clarity, and to give me an opportunity to explain how using unique_ptrs and RAII have simplified object destruction
+		~btree() {}
+
         // The original insert function utilized a private insert() method to perform the node insertion logic, we will retain this functionality
 		void insert(T key) {
 			// nullptr in the below line replaces NULL, for the reasons listed on lines 22-23
@@ -35,7 +41,7 @@ class btree
 				insert(key, root);
 			else
 			{
-				//The below line was originally using operator new to manually allocate memory; I have upgraded it to use a unique_ptr to allow for modern memory management
+				//The below line was originally using operator new to manually allocate memory; I have changed it to use a unique_ptr to allow for modern memory management
                 root = std::make_unique<node<T>>();
 				root->key_value = key;
                 //The below 2 lines utilized NULL instead of nullptr (see lines 22-23 for rationale for this change)
@@ -45,22 +51,14 @@ class btree
 		}
 		// Returns a unique_ptr to the found node (or nullptr if not found)
         // The original search function utilized a private search() method to traverse the tree, we will retain this functionality
-		std::unique_ptr<node<T>> search(T key) {
-			return search(key, root);
-		}
-		void destroy_tree() {
-			destroy_tree(root);
+		// We have also modified the method to return its value by reference in order to avoid copying the unique_ptr
+		const std::unique_ptr<node<T>>& search(T key) {
+			static std::unique_ptr<node<T>> null_node = nullptr;
+			auto& result = search(key, root);
+			return result ? result : null_node;
 		}
 
     private:
-		//This function was rewritten to utilize a unique_ptr instead of a raw pointer
-        //In addition to following best practices, this allows us to automatically delete the node when the unique_ptr is reset
-        void destroy_tree(std::unique_ptr<node<T>>& leaf) {
-			if (leaf) { 
-				destroy_tree(leaf->left);
-				destroy_tree(leaf->right);
-			}
-		}
 		//this method declaration was rewritten to utilize a unique_ptr instead of a raw pointer
         void insert(T key, std::unique_ptr<node<T>>& leaf) {
 			if (key < leaf->key_value)
@@ -92,19 +90,21 @@ class btree
 				}
 			}
 		}
-		//This method declaration was rewritten to utilize a unique_ptr instead of a raw pointer
-        std::unique_ptr<node<T>>& search(T key, std::unique_ptr<node<T>>& leaf) {
-			if (leaf)
+		// this implemetation of the private search() method was rewritten to utilize a unique_ptr instead of a raw pointer
+		// we are also declaring the method as const as the pointer is not being modified
+		// we are also passing the unique_ptr by reference to avoid copying
+        const std::unique_ptr<node<T>>& search(T key, const std::unique_ptr<node<T>>& leaf) {
+			//the below line was rewritten to refer to nullptr instead of NULL
+			if (leaf != nullptr) 
 			{
 				if (key == leaf->key_value)
 					return leaf;
-				if (key<leaf->key_value)
+				if (key < leaf->key_value)
 					return search(key, leaf->left);
 				else
 					return search(key, leaf->right);
 			}
-			//if the key is not found, return a nullptr
-            return std::unique_ptr<node<T>>();
+			else return leaf;
 		}
 
         std::unique_ptr<node<T>> root;
