@@ -19,3 +19,5 @@ These programs were ran on a computer with an AMD Ryzen 9 5900x CPU, a processor
 Since DistributedCounterTest1 only allows one thread to access the counter at a time, it is the slowest (even slower than non-threaded code, since there's overhead associated with the mutex).
 DistributedCounterTest2 utilizes multiple subcounters, which allows for a more efficient use of threading, and a lower time than DistributedCounterTest1, but some of the threads end up utilizing the same cache line, which means the program isn't an efficient as it could be.
 DistributedCounterTest3 adds padding to each counter to avoid false sharing. This allows for the program to be more efficient, and the time is lower than DistributedCounterTest2.
+
+In terms of getting the same result on different computers, I believe that as long as the processor has enough threads to match the specified constexpr in each program (10), they would receive the same relative result (Test1 is slower than Test2, which is slower than Test3).
