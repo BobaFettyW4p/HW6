@@ -16,6 +16,13 @@ struct node
   std::unique_ptr<node<T>> right;
 };
 
+/**
+ * Similar to the above node struct, this btree class has been rewritten to utilize std::unique_ptrs instead of raw pointers
+ * Due to this, we were able to simplify the destructor, and remove the delete_tree() method, instead utilizing RAII to manage memory
+ * One major consideration with the switch to unique_ptrs is that a copy constructor does not make sense due to the fact that unique_ptrs cannot be copied
+ * However, they can be moved, so I opted not to implement a copy constructor, but to implement a move constructor instead
+ * In addition, this class has been templatized, so it can store any type of data, not just ints
+ */
 template<typename T>
 class btree
 {
@@ -26,7 +33,9 @@ class btree
 			root = nullptr;
 		}
 
-		// This btree constructor has been added to initialize root to a new node with the given value
+		// This btree move constructor has been added to initialize root to an existing unique_ptr
+		// This constructor is a move constructor (in contrast to a copy constructor) as unique_ptrs cannot be copied
+		// This constructor takes ownership of the unique_ptr passed in, and transfers it to the new btree object
 		btree(std::unique_ptr<node<T>> new_root) : root(std::move(new_root)) {}
 
 		//Since we rewrote the tree to utilize unique_ptrs instead of raw pointers, the delete_tree() methods have been removed
