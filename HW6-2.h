@@ -45,7 +45,7 @@ class btree
 
         // The original insert function utilized a private insert() method to perform the node insertion logic, we will retain this functionality
 		void insert(T key) {
-			// nullptr in the below line replaces NULL, for the reasons listed on lines 22-23
+	// nullptr in the below line replaces NULL
             if (root != nullptr)
 				insert(key, root);
 			else
